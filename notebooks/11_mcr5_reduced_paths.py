@@ -9,10 +9,18 @@ from datetime import datetime
 import mcr_py.command.step_config
 import mcr_py.helper_functions
 import polars as pl
-from mcr_py.mcr.data import NetworkType, OSMData
+from mcr_py.mcr.data import OSMData
 from mcr_py.mcr5.mcr5 import MCR5
 from mcr_py.utils.geometa import GeoMeta
 from mcr_py.utils.logger import rlog, setup
+
+data_directory = pathlib.Path(__file__).parent.parent.resolve() / "data"
+walking_location_mapping = pl.read_parquet(
+    data_directory / "20250926/cache/cologne_reduced.parquet"
+)
+car_location_mapping = pl.read_parquet(
+    data_directory / "20250926/cache/cologne_reduced_car.parquet"
+)
 
 
 def get_bicycle_public_transport_config_ready(
@@ -38,7 +46,7 @@ def get_bicycle_public_transport_config_ready(
             "initial_steps": initial_steps,
             "repeating_steps": repeating_steps,
         },
-        "location_mappings": geo_data.location_mapping[NetworkType.WALKING],
+        "location_mappings": walking_location_mapping,
         "max_transfers": 5,
         "start_time": start_time,
     }
@@ -53,7 +61,7 @@ def get_car_only_config_ready(geo_data: OSMData) -> dict[str, typing.Any]:
             "initial_steps": initial_steps,
             "repeating_steps": repeating_steps,
         },
-        "location_mappings": geo_data.location_mapping[NetworkType.DRIVING],
+        "location_mappings": car_location_mapping,
         "max_transfers": 1,
     }
 
@@ -74,7 +82,7 @@ def get_bicycle_only_config_ready(
             "initial_steps": initial_steps,
             "repeating_steps": repeating_steps,
         },
-        "location_mappings": geo_data.location_mapping[NetworkType.WALKING],
+        "location_mappings": walking_location_mapping,
         "max_transfers": 5,
     }
 
@@ -98,7 +106,7 @@ def get_public_transport_only_config_ready(
             "initial_steps": initial_steps,
             "repeating_steps": repeating_steps,
         },
-        "location_mappings": geo_data.location_mapping[NetworkType.WALKING],
+        "location_mappings": walking_location_mapping,
         "max_transfers": 5,
         "start_time": start_time,
     }
@@ -114,7 +122,7 @@ def get_walking_only_config_ready(geo_data: OSMData, **_: str) -> dict[str, typi
             "initial_steps": initial_steps,
             "repeating_steps": repeating_steps,
         },
-        "location_mappings": geo_data.location_mapping[NetworkType.WALKING],
+        "location_mappings": walking_location_mapping,
         "max_transfers": 0,
     }
 
@@ -193,9 +201,7 @@ if __name__ == "__main__":
         output_path = mcr5_output_path / key
         output_path.mkdir(parents=True, exist_ok=True)
 
-        location_mappings: pl.DataFrame = config["location_mappings"].filter(
-            pl.col("h3_cell").is_in(["891fa199c77ffff"])
-        )
+        location_mappings: pl.DataFrame = config["location_mappings"]
 
         rlog.info("Calculating for {} hexes".format(len(location_mappings)))
 
