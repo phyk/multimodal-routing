@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import polars as pl
 from rich.console import Console
@@ -9,7 +9,7 @@ from mcr_py.utils import key, storage
 from mcr_py.utils.logger import Timed, rlog
 
 
-def print_stops(path: str) -> None:
+def print_stops(path: Path) -> None:
     """
     Reads and prints the stops DataFrame from the specified path.
 
@@ -20,7 +20,7 @@ def print_stops(path: str) -> None:
     print_dataframe(stops_df)
 
 
-def get_stops_df(path: str) -> pl.DataFrame:
+def get_stops_df(path: Path) -> pl.DataFrame:
     """
     Retrieves the stops DataFrame from a zip file or directory.
 
@@ -28,18 +28,18 @@ def get_stops_df(path: str) -> pl.DataFrame:
     :returns: pl.DataFrame - The DataFrame containing stop information.
     :raises ValueError: If the path is neither a zip file nor a directory.
     """
-    if path.endswith(".zip"):
+    if path.suffix == (".zip"):
         rlog.debug("Reading stops from zip file")
         dfs = archive.read_dfs(path)
         return dfs[key.STOPS_KEY]
 
-    if not os.path.isdir(path):
+    if not path.is_dir():
         msg = "Path is neither a zip file nor a directory"
         raise ValueError(msg)
 
     rlog.debug("Reading stops from directory")
 
-    return storage.read_df(os.path.join(path, storage.get_df_filename_for_name(key.STOPS_KEY)))
+    return storage.read_df(path / storage.get_df_filename_for_name(key.STOPS_KEY))
 
 
 def print_dataframe(df: pl.DataFrame) -> None:

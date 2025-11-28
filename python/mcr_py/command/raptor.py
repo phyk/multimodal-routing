@@ -1,5 +1,6 @@
 import os
 import pathlib
+from pathlib import Path
 from typing import Optional
 
 import polars as pl
@@ -50,13 +51,13 @@ def raptor(
         output_dir,
     )
 
-    footpaths_dict = storage.read_any_dict(footpaths)
+    footpaths_dict = storage.read_any_dict(Path(footpaths))
     if "footpaths" not in footpaths_dict:
         msg = f"Footpaths file {footpaths} has unexpected format."
         raise typer.BadParameter(msg)
     footpaths_dict = footpaths_dict["footpaths"]
 
-    structs_dict = storage.read_any_dict(structs)
+    structs_dict = storage.read_any_dict(Path(structs))
     build.validate_structs_dict(structs_dict)
 
     with Timed.info("Running RAPTOR"):

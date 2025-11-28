@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import polars as pl
@@ -108,8 +109,8 @@ def test_generate_rustworkx(
 
     footpaths = generate(
         city_name="SampleCity",
-        cache_path="/path/to/cache",
-        stops_path="/path/to/stops.csv",
+        cache_path=Path("/path/to/cache"),
+        stops_path=Path("/path/to/stops.csv"),
         avg_walking_speed=1.4,
         method=GenerationMethod.RUSTWORKX,
     )

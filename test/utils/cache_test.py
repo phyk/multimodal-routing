@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import polars as pl
 import polars_st as st
@@ -21,12 +21,6 @@ from shapely.geometry import Polygon
 def sample_gdf() -> pl.DataFrame:
     # Create a simple GeoDataFrame for testing
     return st.GeoDataFrame({"geometry": [Polygon([(0, 0), (1, 1), (1, 0)])], "value": [1]})
-
-
-@pytest.fixture
-def temp_dir(tmp_path: str) -> str:
-    # Use pytest's built-in temporary directory fixture
-    return tmp_path
 
 
 def test_hash_gdf(sample_gdf: pl.DataFrame) -> None:
@@ -54,23 +48,23 @@ def test_combine_hashes() -> None:
     assert isinstance(combined_hash, int)
 
 
-def test_cache_gdf(temp_dir: str, sample_gdf: pl.DataFrame) -> None:
+def test_cache_gdf(tmp_path: Path, sample_gdf: pl.DataFrame) -> None:
     identifier = "test_identifier"
     gdf_hash = hash_df(sample_gdf)
 
-    overwrite_tempdir(str(temp_dir))  # Set the temporary directory
+    overwrite_tempdir(tmp_path)  # Set the temporary directory
     cache_gdf(sample_gdf, gdf_hash, identifier)
 
     # Check if the file exists
-    cached_file_path = os.path.join(temp_dir, f"{identifier}_{gdf_hash}")
-    assert os.path.exists(cached_file_path)
+    cached_file_path = tmp_path / f"{identifier}_{gdf_hash}"
+    assert cached_file_path.exists()
 
 
-def test_read_gdf(temp_dir: str, sample_gdf: pl.DataFrame) -> None:
+def test_read_gdf(tmp_path: Path, sample_gdf: pl.DataFrame) -> None:
     identifier = "test_identifier"
     gdf_hash = hash_df(sample_gdf)
 
-    overwrite_tempdir(str(temp_dir))  # Set the temporary directory
+    overwrite_tempdir(tmp_path)  # Set the temporary directory
     cache_gdf(sample_gdf, gdf_hash, identifier)
 
     # Read the GeoDataFrame back
@@ -79,11 +73,11 @@ def test_read_gdf(temp_dir: str, sample_gdf: pl.DataFrame) -> None:
     assert read_gdf_result.select(st.geom().st.bounds()).row(0) == ([0.0, 0.0, 1.0, 1.0],)
 
 
-def test_cache_entry_exists(temp_dir: str, sample_gdf: pl.DataFrame) -> None:
+def test_cache_entry_exists(tmp_path: Path, sample_gdf: pl.DataFrame) -> None:
     identifier = "test_identifier"
     gdf_hash = hash_df(sample_gdf)
 
-    overwrite_tempdir(str(temp_dir))  # Set the temporary directory
+    overwrite_tempdir(tmp_path)  # Set the temporary directory
     cache_gdf(sample_gdf, gdf_hash, identifier)
 
     assert cache_entry_exists(gdf_hash, identifier) is True

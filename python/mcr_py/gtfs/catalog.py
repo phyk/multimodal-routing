@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import polars as pl
 import requests
@@ -184,7 +185,7 @@ def format_value(value: Any) -> str:
     return formatted_value
 
 
-def download(id: int, output: str) -> None:
+def download(id: int, output: Path) -> None:
     """
     Downloads a GTFS feed based on the specified ID and saves it to the output path.
 

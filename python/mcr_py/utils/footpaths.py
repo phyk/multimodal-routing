@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from typing import Any
 
 import polars as pl
@@ -27,13 +28,13 @@ class GenerationMethod(Enum):
 
 def generate(
     city_name: str,
-    cache_path: str,
-    stops_path: str,
+    cache_path: Path,
+    stops_path: Path,
     avg_walking_speed: float,
     method: GenerationMethod = GenerationMethod.RUSTWORKX,
 ) -> dict[str, dict[str, int]]:
-    nodes = storage.read_df(f"{cache_path}/{city_name}_walking_nodes.parquet")
-    edges = storage.read_df(f"{cache_path}/{city_name}_walking_edges.parquet")
+    nodes = storage.read_df(cache_path / f"{city_name}_walking_nodes.parquet")
+    edges = storage.read_df(cache_path / f"{city_name}_walking_edges.parquet")
     with Timed.info("Reading stops and geo meta"):
         stops_df = storage.read_df(stops_path)
 

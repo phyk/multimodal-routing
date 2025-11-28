@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import typer
 from typing_extensions import Annotated
@@ -87,13 +88,13 @@ def generate(
     with Timed.info("Generating footpaths"):
         footpaths = direct_generate(
             city_id,
-            osm,
-            stops,
+            Path(osm),
+            Path(stops),
             avg_walking_speed,
             parsed_method,
         )
 
-    storage.write_any_dict({FOOTPATHS_KEY: footpaths}, output)
+    storage.write_any_dict({FOOTPATHS_KEY: footpaths}, Path(output))
 
 
 def validate_flags(
