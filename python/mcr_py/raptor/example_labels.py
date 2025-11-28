@@ -11,14 +11,16 @@ class ArrivalTimeLabel(bag.TraceLabel):
     behaves like the original RAPTOR algorithm.
     """
 
-    def __init__(self, time: int, stop: Optional[str] = None) -> None:
+    def __init__(
+        self, time: int, path_index_offset: int, stop_id: Optional[str] = None
+    ) -> None:
         """
         Initializes an ArrivalTimeLabel with an arrival time and an optional stop ID.
 
         :param time: int - The arrival time associated with the label.
         :param stop: Optional[str] - An optional identifier for the stop.
         """
-        super().__init__(time, stop)
+        super().__init__(time, path_index_offset, stop_id=stop_id)
 
     def strictly_dominates(self, other: bag.BaseLabel) -> bool:
         """
@@ -78,7 +80,9 @@ class ActivityDurationLabel(bag.TraceLabel):
     Label class for McRAPTOR algorithm that tracks arrival time, travel time, walking time, and waiting time.
     """
 
-    def __init__(self, time: int, stop: Optional[str] = None) -> None:
+    def __init__(
+        self, time: int, path_index_offset: int, stop_id: Optional[str] = None
+    ) -> None:
         """
         Initializes an ActivityDurationLabel with an arrival time and an optional stop ID,
         and initializes time tracking attributes.
@@ -86,7 +90,7 @@ class ActivityDurationLabel(bag.TraceLabel):
         :param time: int - The arrival time associated with the label.
         :param stop: Optional[str] - An optional identifier for the stop.
         """
-        super().__init__(time, stop)
+        super().__init__(time, path_index_offset, stop_id=stop_id)
         self.travel_time = 0
         self.walking_time = 0
         self.waiting_time = 0

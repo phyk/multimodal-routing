@@ -17,11 +17,13 @@ class IntermediateLabel:
         hidden_values: Sequence[int],
         path: Sequence[int | str],
         osm_node_id: int,
+        path_index_offset: int,
     ) -> None:
         self.values = list(values)
         self.hidden_values = list(hidden_values)
         self.path = list(path)
         self.node_id = osm_node_id
+        self.path_index_offset = path_index_offset
 
     def __str__(self) -> str:
         return f"IntermediateLabel(values={self.values}, hidden_values={self.hidden_values}, path={self.path}, node_id={self.node_id})"
@@ -52,6 +54,7 @@ class IntermediateLabel:
             hidden_values=self.hidden_values.copy(),
             path=self.path.copy(),
             osm_node_id=node_id,
+            path_index_offset=self.path_index_offset,
         )
 
     def to_mlc_label(self, new_node_id: int) -> IntermediateLabel:
@@ -60,6 +63,7 @@ class IntermediateLabel:
             hidden_values=self.hidden_values.copy(),
             path=self.path.copy(),
             osm_node_id=new_node_id,
+            path_index_offset=self.path_index_offset,
         )
 
     def to_mc_raptor_label(self, stop_id: str) -> McRAPTORLabel:
@@ -71,12 +75,14 @@ class IntermediateLabel:
                 stop=stop_id,
                 path=self.path,
                 n_stops=n_stops,
+                path_index_offset=self.path_index_offset,
             )
         return McRAPTORLabel(
             time=self.values[0],
             cost=self.values[1],
             stop=stop_id,
             n_stops=n_stops,
+            path_index_offset=self.path_index_offset,
         )
 
 
@@ -108,8 +114,9 @@ class McRAPTORLabel(McRAPTORBaseLabel):
         cost: int,
         stop: str,
         n_stops: int,
+        path_index_offset: int,
     ) -> None:
-        super().__init__(time, stop)
+        super().__init__(time, path_index_offset, stop_id=stop)
         self.cost = cost
         self.n_stops = n_stops
 
@@ -154,6 +161,7 @@ class McRAPTORLabel(McRAPTORBaseLabel):
             hidden_values=[0, self.n_stops],
             path=[],
             osm_node_id=node_id,
+            path_index_offset=self.path_index_offset,
         )
 
 
@@ -162,9 +170,17 @@ class McRAPTORLabelWithPath(McRAPTORLabel):
     TRIP_PREFIX = "TRIP_"
 
     def __init__(
-        self, time: int, cost: int, stop: str, n_stops, path: list[int | str]
+        self,
+        time: int,
+        cost: int,
+        stop: str,
+        n_stops,
+        path: list[int | str],
+        path_index_offset: int,
     ) -> None:
-        super().__init__(time, cost, stop, n_stops=n_stops)
+        super().__init__(
+            time, cost, stop, n_stops=n_stops, path_index_offset=path_index_offset
+        )
         self.path = path
 
     def __str__(self) -> str:

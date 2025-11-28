@@ -82,19 +82,14 @@ class PathManager:
         self,
         bags: dict[int, set[IntermediateLabel]],
         path_type: PathType,
-        path_index_offset: int = 0,
     ) -> None:
         for bag in bags.values():
             for label in bag:
-                self.extract_path_from_label(
-                    label, path_type, path_index_offset=path_index_offset
-                )
+                self.extract_path_from_label(label, path_type)
 
-    def extract_path_from_label(
-        self, label: IntermediateLabel, path_type: PathType, path_index_offset: int = 0
-    ) -> int:
-        label_path = label.path[path_index_offset:]
-        label.path = label.path[:path_index_offset]
+    def extract_path_from_label(self, label: IntermediateLabel, path_type: PathType) -> int:
+        label_path = label.path[label.path_index_offset :]
+        label.path = label.path[: label.path_index_offset]
 
         if any(path_id > self.path_id_counter for path_id in label.path):  # type: ignore
             msg = f"Label contains path ids that are not in the PathManager. Label path: {label.path}, extracted path: {label_path}, PathManager path ids: {list(self.paths.keys())}"
@@ -106,6 +101,7 @@ class PathManager:
         }
         path_id = self._add_path(path_type, label_path, meta=meta)
         label.path.append(path_id)
+        label.path_index_offset += 1
 
         return path_id
 

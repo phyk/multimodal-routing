@@ -17,6 +17,7 @@ class PyLabel:
     hidden_values: List[int]
     path: List[int]
     node_id: int
+    path_index_offset: int
 
 def run_mlc(graph_cache: GraphCache, start_node_id: int) -> PyBags: ...
 def log_something() -> None: ...

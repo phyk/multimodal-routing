@@ -95,7 +95,7 @@ class MLCStep(Step):
             Callable[[IntermediateBags], IntermediateBags]
         ] = None
 
-    def run(self, input_bags: IntermediateBags, offset: int = 0) -> IntermediateBags:
+    def run(self, input_bags: IntermediateBags) -> IntermediateBags:
         if not input_bags:
             msg = "No input bags"
             raise ValueError(msg)
@@ -124,9 +124,7 @@ class MLCStep(Step):
                 accuracy=ACCURACY_MULTIPLIER,
             )
         with self.timer.info(f"Extracting {self.NAME} step bags"):
-            converted_result_bags = self.convert_bags(
-                raw_result_bags, path_index_offset=offset
-            )
+            converted_result_bags = self.convert_bags(raw_result_bags)
             self.logger.debug(
                 "Extracted %s bags from %s step", len(converted_result_bags), self.NAME
             )
@@ -162,7 +160,6 @@ class MLCStep(Step):
     def convert_bags(
         self,
         bags: dict,
-        path_index_offset: int = 0,
     ) -> IntermediateBags:
         if self.valid_end_nodes is not None:
             bags = {
@@ -180,7 +177,6 @@ class MLCStep(Step):
             self.path_manager.extract_all_paths_from_bags(
                 converted_bags,
                 self.PATH_TYPE,
-                path_index_offset=path_index_offset,
             )
 
         if self.after_conversion_func:

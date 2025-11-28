@@ -42,6 +42,7 @@ fn calculate_new_price(
         path: new_label.path.clone(),
         values: new_values,
         hidden_values: new_label.hidden_values.clone(),
+        path_index_offset: new_label.path_index_offset.clone(),
     }
 }
 
@@ -170,6 +171,7 @@ mod tests {
                 values: vec![0, 0],
                 node_id: 0,
                 path: vec![],
+                path_index_offset: 0,
             };
 
             let mut new_label = bag::Label {
@@ -177,6 +179,7 @@ mod tests {
                 values: vec![0, 0],
                 node_id: 0,
                 path: vec![],
+                path_index_offset: 0,
             };
 
             let result_label = (case.pricing_function)(&old_label, &new_label, 1);

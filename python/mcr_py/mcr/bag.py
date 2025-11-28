@@ -24,6 +24,7 @@ def convert_mlc_bags_to_intermediate_bags(
                 label.hidden_values,
                 label.path,
                 translate_node_id(node_id),
+                label.path_index_offset,
             )
             for label in bag
         }

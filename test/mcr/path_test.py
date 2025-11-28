@@ -28,9 +28,9 @@ def test_path_manager_add_path(path_manager: PathManager) -> None:
 
 
 def test_extract_all_paths_from_bags(path_manager: PathManager) -> None:
-    il1 = IntermediateLabel([1, 1], [1, 1], [1, "a"], 1)
-    il2 = IntermediateLabel([2, 2], [2, 2], [2, "b"], 2)
-    bags = {1: [il1], 2: [il2]}
+    il1 = IntermediateLabel([1, 1], [1, 1], [1, "a"], 1, 0)
+    il2 = IntermediateLabel([2, 2], [2, 2], [2, "b"], 2, 0)
+    bags = {1: {il1}, 2: {il2}}
 
     path_manager.extract_all_paths_from_bags(bags, PathType.WALKING)
 
@@ -41,7 +41,7 @@ def test_extract_all_paths_from_bags(path_manager: PathManager) -> None:
 
 
 def test_extract_path_from_label(path_manager: PathManager) -> None:
-    il = IntermediateLabel([1, 1], [1, 1], [1, "a"], 1)
+    il = IntermediateLabel([1, 1], [1, 1], [1, "a"], 1, 0)
 
     path_id = path_manager.extract_path_from_label(il, PathType.WALKING)
 
@@ -55,7 +55,7 @@ def test_reconstruct_and_translate_path_for_label(path_manager: PathManager) -> 
     path_manager._add_path(PathType.WALKING, [1, "a"])
     path_manager._add_path(PathType.PUBLIC_TRANSPORT, [1, "trip_1", 2])
 
-    il = IntermediateLabel([1, 1], [1, 1], [0, 1], 1)
+    il = IntermediateLabel([1, 1], [1, 1], [0, 1], 1, 0)
     translator_map = {
         PathType.WALKING: {1: "one", "a": "A"},
         PathType.PUBLIC_TRANSPORT: {},

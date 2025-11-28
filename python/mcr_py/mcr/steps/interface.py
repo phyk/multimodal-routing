@@ -17,7 +17,7 @@ class Step:
     ) -> None:
         pass
 
-    def run(self, input_bags: IntermediateBags, offset: int = 0) -> IntermediateBags:
+    def run(self, input_bags: IntermediateBags) -> IntermediateBags:
         raise NotImplementedError
 
     def __str__(self) -> str:

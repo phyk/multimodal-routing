@@ -113,7 +113,7 @@ class McRaptor(Generic[L, S, T]):
             tau_best[stop_id] = Bag()
 
         start_bag = Bag()
-        start_bag.add_if_necessary(self.label_class(start_time, start_stop_id))
+        start_bag.add_if_necessary(self.label_class(start_time, 0, stop_id=start_stop_id))
         tau_i[0][start_stop_id] = start_bag
         tau_best[start_stop_id] = start_bag.copy()
         tracer.add(
@@ -164,7 +164,7 @@ class McRaptor(Generic[L, S, T]):
         """
         marked_stops = set()
         for route_id, (stop_id, idx) in Q.items():
-            route_bag = RouteBag[L, S, T](self.dq, limit_cache={})
+            route_bag = RouteBag[L, S, T](self.dq)
 
             for stop_id in self.dq.iterate_stops_in_route_from_idx(route_id, idx):
                 b_i, marked_stops, route_bag = self.process_route(

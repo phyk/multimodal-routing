@@ -29,6 +29,7 @@ impl<'py> IntoPyDict<'py> for PyBags<usize> {
                     hidden_values: label.hidden_values.clone(),
                     path: label.path.clone(),
                     node_id: label.node_id,
+                    path_index_offset: label.path_index_offset,
                 };
                 py_labels.append(py_label).unwrap();
             }
@@ -49,6 +50,8 @@ pub struct PyLabel {
     pub path: Vec<usize>,
     #[pyo3(get)]
     pub node_id: usize,
+    #[pyo3(get)]
+    pub path_index_offset: usize,
 }
 
 #[pyfunction]
@@ -173,12 +176,18 @@ pub fn run_mlc_with_bags<'py>(
                 .unwrap()
                 .extract::<usize>()
                 .unwrap();
+            let path_index_offset = py_label_extract
+                .getattr("path_index_offset")
+                .unwrap()
+                .extract::<usize>()
+                .unwrap();
 
             let label = Label {
                 values,
                 hidden_values: hidden_values.unwrap_or(vec![]),
                 path,
                 node_id,
+                path_index_offset,
             };
             labels.insert(label);
         }

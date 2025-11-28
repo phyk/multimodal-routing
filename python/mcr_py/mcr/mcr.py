@@ -74,12 +74,10 @@ class MCR:
         start_bags = self.create_start_bags(start_node_id, start_time_in_seconds)
 
         self.logger.debug("Running initial step")
-        offset = 0
         for steps in self.initial_steps:
             result_bags = []
             for step in steps:
-                result_bags.append(step.run(start_bags, offset))
-                offset += 1
+                result_bags.append(step.run(start_bags))
             start_bags = self.merge_bags(*result_bags)
 
         bags_i[0] = start_bags
@@ -93,8 +91,7 @@ class MCR:
             for steps in self.repeating_steps:
                 result_bags = []
                 for step in steps:
-                    result_bags.append(step.run(repeated_bags, offset))
-                    offset += 1
+                    result_bags.append(step.run(repeated_bags))
                 repeated_bags = self.merge_bags(*result_bags, repeated_bags)
                 if len(repeated_bags) == 0:
                     msg = f"No bags found in iteration {i} - stopping"
@@ -123,6 +120,7 @@ class MCR:
                     hidden_values=[0, 0],
                     path=[],
                     osm_node_id=start_node_id,
+                    path_index_offset=0,
                 )
             }
         }

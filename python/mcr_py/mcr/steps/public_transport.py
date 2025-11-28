@@ -140,7 +140,6 @@ class PublicTransportStep(Step):
             self.path_manager.extract_all_paths_from_bags(
                 mc_raptor_result_bags,
                 PathType.PUBLIC_TRANSPORT,
-                path_index_offset=path_index_offset,
             )
 
         return mc_raptor_result_bags

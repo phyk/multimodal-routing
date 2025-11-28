@@ -2,9 +2,9 @@ from mcr_py.mcr.label import IntermediateLabel, merge_intermediate_bags
 
 
 def test_merge_intermediate_bags() -> None:
-    il1 = IntermediateLabel([1, 1], [1, 1], [1, "a"], 1)
-    il2 = IntermediateLabel([2, 2], [2, 2], [2, "b"], 2)
-    il3 = IntermediateLabel([2, 1], [2, 1], [2, "c"], 3)
+    il1 = IntermediateLabel([1, 1], [1, 1], [1, "a"], 1, 0)
+    il2 = IntermediateLabel([2, 2], [2, 2], [2, "b"], 2, 0)
+    il3 = IntermediateLabel([2, 1], [2, 1], [2, "c"], 3, 0)
 
     bag1 = {il1}
     bag2 = {il2, il3}
@@ -18,12 +18,12 @@ def test_merge_intermediate_bags() -> None:
 
 
 def test_merge_intermediate_bags_overlapping() -> None:
-    il1 = IntermediateLabel([5, 0], [1, 1], [1, "a"], 1)
-    il2 = IntermediateLabel([0, 5], [2, 2], [2, "b"], 2)
-    il5 = IntermediateLabel([1, 5], [2, 2], [2, "b"], 2)
-    il3 = IntermediateLabel([2, 3], [2, 1], [2, "c"], 3)
-    il6 = IntermediateLabel([3, 3], [2, 1], [2, "c"], 3)
-    il0 = IntermediateLabel([0, 0], [2, 1], [2, "c"], 3)
+    il1 = IntermediateLabel([5, 0], [1, 1], [1, "a"], 1, 0)
+    il2 = IntermediateLabel([0, 5], [2, 2], [2, "b"], 2, 0)
+    il5 = IntermediateLabel([1, 5], [2, 2], [2, "b"], 2, 0)
+    il3 = IntermediateLabel([2, 3], [2, 1], [2, "c"], 3, 0)
+    il6 = IntermediateLabel([3, 3], [2, 1], [2, "c"], 3, 0)
+    il0 = IntermediateLabel([0, 0], [2, 1], [2, "c"], 3, 0)
     bag1 = {il1, il3, il5}
     bag2 = {il1, il2, il6}
     bag3 = {il1}

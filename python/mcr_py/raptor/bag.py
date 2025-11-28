@@ -9,7 +9,9 @@ from mcr_py.utils.key import S, T
 
 
 class BaseLabel:
-    def __init__(self, time: int, stop_id: Optional[str] = None) -> None:
+    def __init__(
+        self, time: int, path_index_offset: int, stop_id: Optional[str] = None
+    ) -> None:
         """
         Initializes a BaseLabel with an arrival time and an optional stop ID.
 
@@ -17,6 +19,7 @@ class BaseLabel:
         :param stop_id: Optional[str] - An optional identifier for the stop.
         """
         self.arrival_time = time
+        self.path_index_offset = path_index_offset
 
     def __repr__(self) -> str:
         """
@@ -368,7 +371,9 @@ class RouteBag(Generic[L, S, T]):
 
 
 class TraceLabel(BaseLabel):
-    def __init__(self, time: int, stop: Optional[str] = None) -> None:
+    def __init__(
+        self, time: int, path_index_offset: int, stop_id: Optional[str] = None
+    ) -> None:
         """
         Initializes a TraceLabel with an arrival time and optional stop ID,
         and initializes lists to track stops, trips, and traces.
@@ -376,13 +381,13 @@ class TraceLabel(BaseLabel):
         :param time: int - The arrival time associated with the label.
         :param stop: Optional[str] - An optional identifier for the stop.
         """
-        super().__init__(time, stop)
+        super().__init__(time, path_index_offset, stop_id=stop_id)
         self.stops = []
         self.trips = []
         self.traces = []
-        if stop is not None and time is not None:
-            self.stops.append(stop)
-            self.traces.append(TraceStart(stop, time))
+        if stop_id is not None and time is not None:
+            self.stops.append(stop_id)
+            self.traces.append(TraceStart(stop_id, time))
 
         self.last_update = "start"
 
