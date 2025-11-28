@@ -38,7 +38,7 @@ dependencies=[
     "pre-commit>=4.0.1",
     "pyarrow>=19.0.0",
     "pyproj>=3.7.1",
-    "pyright>=1.1.404",
+    "pyright>1.1.406",
     "pyserde>=0.23.0",
     "pytest>=8.3.5",
     "requests>=2.32.3",
