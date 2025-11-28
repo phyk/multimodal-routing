@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import pickle
 import tomllib
@@ -24,6 +25,7 @@ def plot_paths_on_map(
     path_name: pathlib.Path,
     stops_by_id: pd.DataFrame,
 ) -> None:
+    logging.info("Generating path image %s", path_name)
     nodes_by_id = nodes.set_index("id", drop=False)
     fig = go.Figure()
 
@@ -252,6 +254,12 @@ def generate_path_image(
         on="osm_node_id",
     )
     nodes = geo_data.osm_nodes.with_columns(pl.col("osm_id").alias("id")).to_pandas()
+    if "car" in output_path.name:
+        nodes = (
+            geo_data.additional_networks[NetworkType.DRIVING][0]
+            .with_columns(pl.col("osm_id").alias("id"))
+            .to_pandas()
+        )
     path_manager = data["path_manager"]
 
     translator_map = {
@@ -347,11 +355,16 @@ if __name__ == "__main__":
         if not mode_setting.is_dir():
             continue
         for file in mode_setting.iterdir():
-            if file.suffix == ".pkl" and file.name != "errors.pkl":
+            fig_path = (
+                figures_directory
+                / f"{file.name.replace('.pkl', '')}_{mode_setting.name}_paths.png"
+            )
+            if (
+                file.suffix == ".pkl" and file.name != "errors.pkl"
+            ):  # and not fig_path.exists():
                 generate_path_image(
                     file,
-                    figures_directory
-                    / f"{file.name.replace('.pkl', '')}_{mode_setting.name}_paths.png",
+                    fig_path,
                     geo_data,
                     gtfs_clean_stops,
                 )

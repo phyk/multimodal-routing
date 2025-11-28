@@ -22,11 +22,12 @@ start_times=["08:02:28"]
 
 [mcr5_types]
 mcr5_types=[
-    # "bicycle",
-    # "car",
+    "bicycle",
+    "bicycle_public_transport",
+    "car",
     "public_transport",
-    # "bicycle_public_transport", "public_transport",
-    # "walking",
+    "public_transport",
+    "walking",
 ]
 
 [city.cologne]
