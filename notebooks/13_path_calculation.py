@@ -187,12 +187,21 @@ def plot_paths_on_map(
             )
         )
 
+    if walking_paths_lat and walking_paths_long:
+        center_lat = walking_paths_lat[0]
+        center_lon = walking_paths_long[0]
+    else:
+        center_lat = cycling_paths_lat[0]
+        center_lon = cycling_paths_long[0]
+
     fig.add_trace(
         go.Scattermap(
-            lat=["50.948884"],  # Latitude of the marker
-            lon=["6.917342"],  # Longitude of the marker
+            lat=[str(center_lat)],  # Latitude of the marker
+            lon=[str(center_lon)],  # Longitude of the marker
             mode="markers",
-            marker={"size": 14, "color": "lightgreen"},
+            marker_symbol="hexagram-dot",
+            marker_color="lightskyblue",
+            marker_size=15,
             text=["Starting Point"],  # Hover text
             name="Starting Point",
             showlegend=True,
@@ -204,7 +213,7 @@ def plot_paths_on_map(
         map={
             "style": "carto-positron-nolabels",
             "zoom": 16,  # street level
-            "center": {"lat": 50.948884, "lon": 6.917342},
+            "center": {"lat": center_lat, "lon": center_lon},
         },
         legend={
             "title": {
@@ -216,8 +225,8 @@ def plot_paths_on_map(
             "y": 1,  # vertical position (0=bottom, 1=top)
         },
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        height=2000,
-        width=2400,
+        height=4000,
+        width=4000,
     )
     fig.write_image(path_name, scale=2)
 
