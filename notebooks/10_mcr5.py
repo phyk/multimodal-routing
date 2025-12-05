@@ -137,7 +137,9 @@ if __name__ == "__main__":
     geometa_path = base_directory / f"cache/{city_name}_geometa.json"
 
     mcr5_output_path = base_directory / f"mcr5_results/{city_name}"
-    bicycle_base_path = f"../data/sharing_locations_clustered/{city_name.lower()}_bikes/"
+    bicycle_base_path = (
+        data_directory / f"sharing_locations_clustered/{city_name.lower()}_bikes/"
+    )
 
     geo_meta, geo_data = mcr_py.helper_functions.load_auxiliary_classes(
         geo_meta_path=geometa_path,
@@ -160,23 +162,25 @@ if __name__ == "__main__":
             get_walking_only_config_ready, start_time="08:00:00"
         )
     if "bicycle" in settings["mcr5_types"]["mcr5_types"]:
-        configs["bicycle"] = functools.partial(
-            get_bicycle_only_config_ready,
-            geo_meta=geo_meta,
-            bicycle_location_path=gbfs_path,
-        )
+        for file in pathlib.Path(bicycle_base_path).iterdir():
+            configs["bicycle"] = functools.partial(
+                get_bicycle_only_config_ready,
+                geo_meta=geo_meta,
+                bicycle_location_path=file.resolve(),
+            )
     if "car" in settings["mcr5_types"]["mcr5_types"]:
         configs["car"] = get_car_only_config_ready
     if "bicycle_public_transport" in settings["mcr5_types"]["mcr5_types"]:
         for idx, time in enumerate(settings["public_transport"]["start_times"]):
-            configs[f"bicycle_public_transport_{idx}"] = functools.partial(
-                get_bicycle_public_transport_config_ready,
-                geo_meta=geo_meta,
-                bicycle_location_path=gbfs_path,
-                structs=gtfs_clean_struct,
-                stops=gtfs_clean_stops,
-                start_time=time,
-            )
+            for file in pathlib.Path(bicycle_base_path).iterdir():
+                configs[f"bicycle_public_transport_{idx}"] = functools.partial(
+                    get_bicycle_public_transport_config_ready,
+                    geo_meta=geo_meta,
+                    bicycle_location_path=file.resolve(),
+                    structs=gtfs_clean_struct,
+                    stops=gtfs_clean_stops,
+                    start_time=time,
+                )
 
     runtimes = {}
     for key, config in configs.items():
