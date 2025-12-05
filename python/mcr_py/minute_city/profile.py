@@ -37,9 +37,16 @@ def calculate_profile_for_group(
             )
         labels_for_cost = labels_for_cost.filter(pl.all_horizontal(pl.col(*poi_types) > 0))
         curr_time = labels_for_cost.collect().get_column("time").min()
+        start_id_hex = group.get_column("start_id_hex").first()
+        if labels_for_cost.collect().is_empty():
+            continue
         if not isinstance(curr_time, int):
             error_msg = "Time should always be an integer"
-            raise ValueError(error_msg)
+            raise ValueError(
+                error_msg,
+                start_id_hex,
+                labels_for_cost.collect().shape,
+            )
         if curr_time > PROFILE_MAX_TIME:
             start_id_hex = group.get_column("start_id_hex").first()
             error_msg = f"Time limit exceeded for hex id {start_id_hex} at cost {cost}"
