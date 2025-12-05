@@ -58,7 +58,7 @@ if __name__ == "__main__":
     base_directory = data_directory / settings["timestamp"]["timestamp"]
     cache_path = base_directory / "cache/"
     osm_path = base_directory / "osm_raw"
-    geometa_path = base_directory / f"cache/{city_name}_geometa.pkl"
+    geometa_path = base_directory / f"cache/{city_name}_geometa.json"
     mcr5_output_path = base_directory / f"mcr5_results/{city_name}"
 
     geo_meta, geo_data = mcr_py.helper_functions.load_auxiliary_classes(
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             scenario=pl.lit(scenario), core_scenario=pl.lit(core_scenario)
         )
         profiles_df_per_scenario[scenario] = scenario_df
-    profiles_df: pl.DataFrame = pl.concat(profiles_df_per_scenario.values())
+    profiles_df: pl.DataFrame = pl.concat(profiles_df_per_scenario.values(), how="diagonal")
     profiles_df = calculate_unit_metrics(profiles_df)
     profiles_df = reorder_columns(profiles_df)
     profiles_df = fill_columns_by_left(profiles_df)
@@ -114,7 +114,8 @@ if __name__ == "__main__":
         )
         profiles_df_per_scenario_per_type[t][scenario] = scenario_df
     profiles_df_categories = pl.concat(
-        [df for dfs in profiles_df_per_scenario_per_type.values() for df in dfs.values()]
+        [df for dfs in profiles_df_per_scenario_per_type.values() for df in dfs.values()],
+        how="diagonal",
     )
     profiles_df_categories = calculate_unit_metrics(profiles_df_categories)
     profiles_df_categories = reorder_columns(profiles_df_categories)
