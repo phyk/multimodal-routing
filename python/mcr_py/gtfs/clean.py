@@ -103,7 +103,9 @@ def split_routes_by_direction(trips_df: pl.DataFrame) -> pl.DataFrame:
     """
     if "direction_id" in trips_df.columns:
         return trips_df.with_columns(
-            pl.col("route_id") + pl.lit("_") + pl.col("direction_id").cast(pl.String)
+            pl.col("route_id").cast(pl.String)
+            + pl.lit("_")
+            + pl.col("direction_id").cast(pl.String)
         )
     else:
         return trips_df
