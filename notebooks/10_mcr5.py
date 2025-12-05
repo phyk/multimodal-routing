@@ -162,10 +162,10 @@ if __name__ == "__main__":
             get_walking_only_config_ready, start_time="08:00:00"
         )
     if "bicycle" in settings["mcr5_types"]["mcr5_types"]:
-        for file in pathlib.Path(bicycle_base_path).iterdir():
+        for idx, file in enumerate(pathlib.Path(bicycle_base_path).iterdir()):
             if file.suffix != ".parquet":
                 continue
-            configs["bicycle"] = functools.partial(
+            configs[f"bicycle_{idx}"] = functools.partial(
                 get_bicycle_only_config_ready,
                 geo_meta=geo_meta,
                 bicycle_location_path=file.resolve(),
@@ -174,10 +174,10 @@ if __name__ == "__main__":
         configs["car"] = get_car_only_config_ready
     if "bicycle_public_transport" in settings["mcr5_types"]["mcr5_types"]:
         for idx, time in enumerate(settings["public_transport"]["start_times"]):
-            for file in pathlib.Path(bicycle_base_path).iterdir():
+            for idx2, file in enumerate(pathlib.Path(bicycle_base_path).iterdir()):
                 if file.suffix != ".parquet":
                     continue
-                configs[f"bicycle_public_transport_{idx}"] = functools.partial(
+                configs[f"bicycle_{idx2}_public_transport_{idx}"] = functools.partial(
                     get_bicycle_public_transport_config_ready,
                     geo_meta=geo_meta,
                     bicycle_location_path=file.resolve(),

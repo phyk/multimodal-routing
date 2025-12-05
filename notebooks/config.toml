@@ -29,9 +29,8 @@ mcr5_types=[
     "bicycle",
     "bicycle_public_transport",
     "car",
-    "public_transport",
-    "public_transport",
-    "walking",
+    # "public_transport",
+    # "walking",
 ]
 
 [city.cologne]
