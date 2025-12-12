@@ -1,5 +1,5 @@
 import overpass
-from shapely.geometry import Polygon
+from shapely.geometry import MultiPolygon, Polygon
 
 
 def fetch_boundary_polygon(city_name_german: str, admin_level: int) -> Polygon:
@@ -14,9 +14,19 @@ def fetch_boundary_polygon(city_name_german: str, admin_level: int) -> Polygon:
     relation["boundary"="administrative"]["admin_level"="{admin_level}"](area.searchArea);"""
     api = overpass.API()
     result = api.get(query, verbosity="geom", responseformat="geojson")
-    boundary_polygon = Polygon(result["features"][0]["geometry"]["coordinates"][0][0])  # type: ignore
+    biggest_polygon = []
+    for [polygon] in result["features"][0]["geometry"]["coordinates"]:
+        if len(polygon) > len(biggest_polygon):
+            biggest_polygon = polygon
 
-    return boundary_polygon
+    boundary_polygon_ = MultiPolygon(result["features"][0]["geometry"]["coordinates"])
+
+    largest_polygon = boundary_polygon_.geoms[0]
+    for polygon in boundary_polygon_.geoms:
+        if polygon.area > largest_polygon.area:
+            largest_polygon = polygon
+
+    return largest_polygon
 
 
 if __name__ == "__main__":
