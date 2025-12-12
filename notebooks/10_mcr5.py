@@ -124,7 +124,8 @@ if __name__ == "__main__":
         settings = tomllib.load(f)
 
     setup(settings["run_type"]["run_type"])
-    city_name = "cologne"
+    # city_name = "cologne"
+    city_name = "berlin"
     data_directory = pathlib.Path(__file__).parent.parent.resolve() / "data"
     base_directory = data_directory / settings["timestamp"]["timestamp"]
     cache_path = base_directory / "cache/"
