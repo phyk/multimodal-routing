@@ -1,11 +1,12 @@
-use log::info;
-use mlc::bag::{Weight, WeightsTuple};
+use log::{debug, info};
+use mlc::bag::WeightsTuple;
 use mlc::read::MLCGraph;
-use petgraph::{graph::NodeIndex, Directed, Graph};
+use petgraph::graph::{DiGraph, NodeIndex};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::usize;
 
 #[pyclass]
 pub struct GraphCache {
@@ -19,9 +20,11 @@ impl GraphCache {
         GraphCache { graph: None }
     }
 
-    fn set_graph(&mut self, raw_edges: Vec<HashMap<&str, &PyAny>>) {
+    fn set_graph<'py>(&mut self, raw_edges: Bound<'py, PyAny>) {
+        debug!("Parsing Graph from {} edges", raw_edges.len().unwrap());
         let graph = parse_graph(raw_edges);
         self.graph = Some(Arc::new(graph));
+        debug!("Parsing successfull");
     }
 
     fn set_node_weights(&mut self, node_weights: HashMap<usize, Vec<u8>>) {
@@ -41,7 +44,6 @@ impl GraphCache {
 
         self.graph = Some(Arc::new(new_graph));
     }
-
 
     fn summary(&self) -> PyResult<()> {
         if let Some(graph) = &self.graph {
@@ -86,49 +88,19 @@ impl GraphCache {
     }
 }
 
-fn parse_graph(raw_edges: Vec<HashMap<&str, &PyAny>>) -> MLCGraph<u8> {
-    Graph::<Vec<u8>, WeightsTuple, Directed>::from_edges(raw_edges.iter().map(|edge| {
-        let u = edge.get("u").unwrap().extract::<usize>().unwrap();
-        let v = edge.get("v").unwrap().extract::<usize>().unwrap();
-        // // wait 0.02 seconds
-        // std::thread::sleep(std::time::Duration::from_millis(20));
-        let weights: Vec<Weight> =
-            parse_weights(edge.get("weights").expect("weights not found")).unwrap();
-
-        let hidden_weights: Vec<Weight> = parse_weights(
-            edge.get("hidden_weights")
-                .expect("hidden_weights not found"),
-        )
-        .unwrap();
-
-        // let hidden_weights: Vec<Weight> = edge
-        //     .get("hidden_weights")
-        //     .map(parse_weights)
-        //     .transpose()
-        //     .unwrap()
-        //     .unwrap_or(vec![]);
+fn parse_graph<'py>(raw_edges: Bound<'py, PyAny>) -> MLCGraph<u8> {
+    let mut edge_list = Vec::new();
+    for py_obj in raw_edges.try_iter().unwrap() {
+        let (u, v, weights, hidden_weights) = py_obj
+            .unwrap()
+            .extract::<(usize, usize, Vec<u64>, Vec<u64>)>()
+            .unwrap();
 
         let weights_tuple = WeightsTuple {
             weights,
             hidden_weights,
         };
-        (NodeIndex::new(u), NodeIndex::new(v), weights_tuple)
-    }))
-}
-
-fn parse_weights(raw_weights: &&PyAny) -> Result<Vec<u64>, String> {
-    let raw_weights = raw_weights
-        .extract::<String>()
-        .map_err(|_| "Failed to extract string".to_string())?;
-    // remove first and last character (brackets)
-    let raw_weights = &raw_weights[1..raw_weights.len() - 1];
-    let weights: Result<Vec<u64>, _> = raw_weights
-        .split(",")
-        .map(|x| {
-            x.parse::<u64>()
-                .map_err(|_| format!("Failed to parse weight: {}", x))
-        })
-        .collect();
-
-    weights.map_err(|e| e.to_string())
+        edge_list.push((NodeIndex::new(u), NodeIndex::new(v), weights_tuple));
+    }
+    DiGraph::<Vec<u8>, WeightsTuple>::from_edges(edge_list)
 }

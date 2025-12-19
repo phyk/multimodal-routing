@@ -1,21 +1,26 @@
 # mcr-py
 
+## Todo
+Check output of MCR5
+- walking Berlin
+- walking Cologne
+- errors -> are these Hexes reachable by the nodes available?
+
+
+Removing pandas and geopandas
+- minute_city
+- mcr5
+
+Add Tests:
+- raptor
+- mcr
+
+Meaningful Logging:
+- osmtools
+
 ## Installation
 
-Recommendation: Use mamba to create the environment faster.
 
-```
-conda config --add channels conda-forge
-conda config --set channel_priority strict
-conda install mamba
-```
-
-Setup environment:
-
-```
-mamba env create -f environment.yaml
-conda activate mcr-py
-```
 
 ### Running Analysis for Cologne
 
@@ -40,7 +45,7 @@ Build-structures prepares the format exactly for the algorithm.
 python src/main.py gtfs crop ./data/vrs.zip ./data/cologne_gtfs.zip \                                                                                        ─╯
     --geometa-path ./data/geometa.pkl \
     --time-start 23.06.2023-00:00:00 \
-    --time-end 24.06.2023-00:00:00 
+    --time-end 24.06.2023-00:00:00
 python src/main.py gtfs clean  ./data/cologne_gtfs.zip ./data/cleaned/
 python src/main.py build-structures ./data/cleaned/ ./data/structs.pkl
 ```

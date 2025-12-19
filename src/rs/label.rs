@@ -14,9 +14,10 @@ fn calculate_new_price(
     old_label: &bag::Label<usize>,
     new_label: &bag::Label<usize>,
     info: &PriceIncrementInfo,
+    accuracy: u64,
 ) -> bag::Label<usize> {
-    let old_duration_minutes = old_label.hidden_values[0] / 60;
-    let new_duration_minutes = new_label.hidden_values[0] / 60;
+    let old_duration_minutes = old_label.hidden_values[0] / (60 * accuracy);
+    let new_duration_minutes = new_label.hidden_values[0] / (60 * accuracy);
 
     let old_price_increment_intervals =
         calculate_price_increment_intervals(old_duration_minutes, info);
@@ -41,6 +42,7 @@ fn calculate_new_price(
         path: new_label.path.clone(),
         values: new_values,
         hidden_values: new_label.hidden_values.clone(),
+        path_index_offset: new_label.path_index_offset.clone(),
     }
 }
 
@@ -65,22 +67,25 @@ const PERSONAL_CAR_INFO: PriceIncrementInfo = PriceIncrementInfo {
 pub fn next_bike_tariff(
     old_label: &bag::Label<usize>,
     new_label: &bag::Label<usize>,
+    accuracy: u64,
 ) -> bag::Label<usize> {
-    calculate_new_price(old_label, new_label, &NEXT_BIKE_TARIFF_INFO)
+    calculate_new_price(old_label, new_label, &NEXT_BIKE_TARIFF_INFO, accuracy)
 }
 
 pub fn next_bike_without_tariff(
     old_label: &bag::Label<usize>,
     new_label: &bag::Label<usize>,
+    accuracy: u64,
 ) -> bag::Label<usize> {
-    calculate_new_price(old_label, new_label, &NEXT_BIKE_NO_TARIFF_INFO)
+    calculate_new_price(old_label, new_label, &NEXT_BIKE_NO_TARIFF_INFO, accuracy)
 }
 
 pub fn personal_car(
     old_label: &bag::Label<usize>,
     new_label: &bag::Label<usize>,
+    accuracy: u64,
 ) -> bag::Label<usize> {
-    calculate_new_price(old_label, new_label, &PERSONAL_CAR_INFO)
+    calculate_new_price(old_label, new_label, &PERSONAL_CAR_INFO, accuracy)
 }
 
 #[cfg(test)]
@@ -92,7 +97,7 @@ mod tests {
         old_hidden_values: Vec<u64>,
         new_hidden_values: Vec<u64>,
         expected_price: u64,
-        pricing_function: fn(&bag::Label<usize>, &bag::Label<usize>) -> bag::Label<usize>,
+        pricing_function: fn(&bag::Label<usize>, &bag::Label<usize>, u64) -> bag::Label<usize>,
     }
 
     #[test]
@@ -129,6 +134,12 @@ mod tests {
                 pricing_function: next_bike_without_tariff,
             },
             TestCase {
+                old_hidden_values: vec![0 * 60],
+                new_hidden_values: vec![59],
+                expected_price: 19,
+                pricing_function: personal_car,
+            },
+            TestCase {
                 old_hidden_values: vec![1 * 60],
                 new_hidden_values: vec![2 * 60],
                 expected_price: 0,
@@ -146,28 +157,48 @@ mod tests {
                 expected_price: 100,
                 pricing_function: next_bike_without_tariff,
             },
+            TestCase {
+                old_hidden_values: vec![25 * 60],
+                new_hidden_values: vec![35 * 60],
+                expected_price: 190,
+                pricing_function: personal_car,
+            },
         ];
 
         for (i, case) in test_cases.iter().enumerate() {
-            let old_label = bag::Label {
+            let mut old_label = bag::Label {
                 hidden_values: case.old_hidden_values.clone(),
                 values: vec![0, 0],
                 node_id: 0,
                 path: vec![],
+                path_index_offset: 0,
             };
 
-            let new_label = bag::Label {
+            let mut new_label = bag::Label {
                 hidden_values: case.new_hidden_values.clone(),
                 values: vec![0, 0],
                 node_id: 0,
                 path: vec![],
+                path_index_offset: 0,
             };
 
-            let result_label = (case.pricing_function)(&old_label, &new_label);
+            let result_label = (case.pricing_function)(&old_label, &new_label, 1);
             assert_eq!(
                 result_label.values[1],
                 case.expected_price.clone(),
                 "TC[{}] failed with old_label.hidden_values: {:?}, new_label.hidden_values: {:?} \n {:?}",
+                i,
+                old_label.hidden_values,
+                new_label.hidden_values,
+                case
+            );
+            old_label.hidden_values = old_label.hidden_values.iter().map(|x| x * 10).collect();
+            new_label.hidden_values = new_label.hidden_values.iter().map(|x| x * 10).collect();
+            let result_label_higher_acc = (case.pricing_function)(&old_label, &new_label, 10);
+            assert_eq!(
+                result_label_higher_acc.values[1],
+                case.expected_price.clone(),
+                "TC[{}] failed with higher acc old_label.hidden_values: {:?}, new_label.hidden_values: {:?} \n {:?}",
                 i,
                 old_label.hidden_values,
                 new_label.hidden_values,
