@@ -30,13 +30,13 @@ def crop(
     with Timed.debug("Reading GTFS data"):
         dfs = archive.read_dfs(path)
 
-    trips_df, stop_times_df, stops_df, calendar_df, routes_df = (
+    trips_df, stop_times_df, stops_df, routes_df = (
         dfs[key.TRIPS_KEY],
         dfs[key.STOP_TIMES_KEY],
         dfs[key.STOPS_KEY],
-        dfs[key.CALENDAR_KEY],
         dfs[key.ROUTES_KEY],
     )
+    calendar_df = dfs.get(key.CALENDAR_KEY)
 
     n_trips, n_stop_times, n_stops = (
         len(trips_df),
@@ -67,17 +67,20 @@ def crop(
         msg = f"Bounding box is too small, no trips or stops remain: {n_trips_after_bbox} trips, {n_stops_after_bbox} stops"
         raise ValueError(msg)
 
-    trips_df, calendar_df = crop_trips(trips_df, calendar_df, time_start, time_end)
-    stop_times_df = reconcile_stop_times_with_trips(stop_times_df, trips_df)
-    stops_df = reconcile_stops_with_stop_times(stops_df, stop_times_df)
+    if calendar_df is not None:
+        trips_df, calendar_df = crop_trips(trips_df, calendar_df, time_start, time_end)
+        stop_times_df = reconcile_stop_times_with_trips(stop_times_df, trips_df)
+        stops_df = reconcile_stops_with_stop_times(stops_df, stop_times_df)
 
-    rlog.debug(
-        f"""
+        rlog.debug(
+            f"""
         Time range trips remaining: {len(trips_df)}/{n_trips_after_bbox} ({len(trips_df) / n_trips_after_bbox:.2%})
         Time range stops remaining: {len(stops_df)}/{n_stops_after_bbox} ({len(stops_df) / n_stops_after_bbox:.2%})
         Time range stop times remaining: {len(stop_times_df)}/{n_stop_times} ({len(stop_times_df) / n_stop_times:.2%})
         """
-    )
+        )
+    else:
+        rlog.debug("No calendar.txt found, skipping time-range crop")
 
     rlog.info(
         f"""\
@@ -87,16 +90,16 @@ def crop(
         # of stops: {len(stops_df)} ({len(stops_df) / n_stops:.2%})"""
     )
 
-    archive.write_dfs(
-        {
-            key.TRIPS_KEY: trips_df,
-            key.STOP_TIMES_KEY: stop_times_df,
-            key.STOPS_KEY: stops_df,
-            key.CALENDAR_KEY: calendar_df,
-            key.ROUTES_KEY: routes_df,  # todo this is not being cropped, but is small anyways
-        },
-        output,
-    )
+    write_dfs = {
+        key.TRIPS_KEY: trips_df,
+        key.STOP_TIMES_KEY: stop_times_df,
+        key.STOPS_KEY: stops_df,
+        key.ROUTES_KEY: routes_df,
+    }
+    if calendar_df is not None:
+        write_dfs[key.CALENDAR_KEY] = calendar_df
+
+    archive.write_dfs(write_dfs, output)
 
 
 def reconcile_trips_and_stop_times_with_stops(

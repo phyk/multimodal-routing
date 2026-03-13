@@ -24,7 +24,7 @@ def get_gtfs_filename(name: str) -> str:
 STOPS_FILE = get_gtfs_filename(STOPS_KEY)
 TRIPS_FILE = get_gtfs_filename(TRIPS_KEY)
 STOP_TIMES_FILE = get_gtfs_filename(STOP_TIMES_KEY)
-CALENDAR_FILE = get_gtfs_filename("calendar")
+# CALENDAR_FILE = get_gtfs_filename("calendar")
 ROUTES_FILE = get_gtfs_filename("routes")
 
 
@@ -32,7 +32,7 @@ EXPECTED_FILES = [
     STOPS_FILE,
     TRIPS_FILE,
     STOP_TIMES_FILE,
-    CALENDAR_FILE,
+    # CALENDAR_FILE,
     ROUTES_FILE,
 ]
 
