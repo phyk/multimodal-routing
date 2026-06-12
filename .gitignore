@@ -12,3 +12,7 @@ data
 .DS_Store
 .venv
 *.so
+.mcp.json
+.repowise-workspace.yaml
+.repowise
+.repowise-workspace
