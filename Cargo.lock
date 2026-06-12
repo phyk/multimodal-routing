@@ -1778,6 +1778,7 @@ dependencies = [
  "csv",
  "log",
  "petgraph",
+ "rustc-hash",
  "serde",
 ]
 
